@@ -17,7 +17,8 @@ const createTransaction = async (req, res, next) => {
 		const total_price = product.price * quantity;
 
 		const newTransaction = new Transaction({
-			productId: productId,
+			product,
+			cashier: req.user.name,
 			quantity,
 			total_price,
 			status: 'pending'
@@ -35,7 +36,7 @@ const updateStatusTransaction = async (req, res, next) => {
 	const { statusTransaction } = req.body;
 
 	try {
-		const transaction = Transaction.findById(transactionId);
+		const transaction = await Transaction.findById(transactionId);
 
 		if (!transaction) {
 			return res.status(404).json({ message: 'Transaction not found' });
@@ -56,7 +57,7 @@ const getAllTransactions = async (req, res, next) => {
 		if (req.user.role === 'owner') {
 			transactions = await Transaction.find().populate('product');
 		} else {
-			transactions = await Transaction.find({ user: req.user._id }).populate('product');
+			transactions = await Transaction.find({ cashier: req.user.name }).populate('product');
 		}
 		res.status(200).json({ data: transactions });
 	} catch (error) {
