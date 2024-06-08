@@ -17,8 +17,9 @@ const login = async (req, res, next) => {
 				res.cookie('refreshToken', refreshToken, {
 					httpOnly: true,
 					secure: process.env.NODE_ENV === 'production',
-					sameSite: 'strict',
-					maxAge: 7 * 24 * 60 * 60 * 1000
+					sameSite: 'none',
+					maxAge: 7 * 24 * 60 * 60 * 1000,
+					domain: 'https://pos-fe-edu.vercel.app'
 				});
 
 				res.json({ accessToken });
