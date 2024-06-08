@@ -11,7 +11,12 @@ import productRouter from './routes/productRoutes.js';
 import transactionRouter from './routes/transactionRoute.js';
 import { notFoundError, errorHandler } from './middlewares/errorMiddleware.js';
 
-app.use(cors());
+const corsOptions = {
+  origin: '*',
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
