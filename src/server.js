@@ -12,7 +12,7 @@ import transactionRouter from './routes/transactionRoute.js';
 import { notFoundError, errorHandler } from './middlewares/errorMiddleware.js';
 
 const corsOptions = {
-  origin: 'https://pos-fe-edu.vercel.app',
+  origin: '*',
   credentials: true,
 };
 
