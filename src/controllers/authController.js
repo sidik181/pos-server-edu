@@ -14,15 +14,14 @@ const login = async (req, res, next) => {
 				const accessToken = generateAccessToken(user);
 				const refreshToken = generateRefreshToken(user);
 
-				res.cookie('refreshToken', refreshToken, {
-					httpOnly: true,
-					secure: process.env.NODE_ENV === 'production',
-					sameSite: 'none',
-					maxAge: 7 * 24 * 60 * 60 * 1000,
-					domain: 'https://pos-fe-edu.vercel.app'
-				});
+				// res.cookie('refreshToken', refreshToken, {
+				// 	httpOnly: true,
+				// 	secure: process.env.NODE_ENV === 'production',
+				// 	sameSite: 'lax',
+				// 	maxAge: 7 * 24 * 60 * 60 * 1000,
+				// });
 
-				res.json({ accessToken });
+				res.json({ accessToken, refreshToken });
 			} else {
 				res.status(401).json({ message: 'Invalid email or password' });
 			}
