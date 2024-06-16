@@ -1,25 +1,24 @@
 import express from 'express';
 import productController from '../controllers/productController.js';
-import { verifyToken } from '../middlewares/tokenManager.js';
-import authorizeUser from '../middlewares/authorizeUser.js';
+import { authorizeUser, protectedRoute } from '../middlewares/authorizeUser.js';
 const router = express.Router();
 
 router.post(
 	'/products',
-	verifyToken,
+	protectedRoute,
 	authorizeUser('owner'),
 	productController.addProduct
 );
 
 router.get(
 	'/products',
-	verifyToken,
+	protectedRoute,
 	productController.getProducts
 );
 
 router.delete(
 	'/products/:id',
-	verifyToken,
+	protectedRoute,
 	authorizeUser('owner'),
 	productController.deleteProductById
 );

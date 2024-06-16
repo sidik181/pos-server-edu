@@ -30,5 +30,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "src/utils/deleteExpiredTokens.js",
+      "scheduled": "0 0 * * *"
+    }
   ]
 }

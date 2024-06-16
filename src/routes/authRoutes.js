@@ -1,6 +1,7 @@
 import express from 'express';
-import { verifyToken } from '../middlewares/tokenManager.js';
+import { verifyToken } from '../utils/tokenManager.js';
 import authController from '../controllers/authController.js';
+import { protectedRoute } from '../middlewares/authorizeUser.js';
 const router = express.Router();
 
 router.post(
@@ -10,18 +11,14 @@ router.post(
 
 router.post(
 	'/logout',
+	protectedRoute,
 	authController.logout
 );
 
 router.get(
 	'/profile',
-	verifyToken,
+	protectedRoute,
 	authController.getProfile
-);
-
-router.post(
-	'/session-token',
-	authController.refreshToken
 );
 
 export default router;

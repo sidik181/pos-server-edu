@@ -4,15 +4,16 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 const app = express();
 env.config()
-import('./services/database.js')
+import('./src/services/database.js')
 
-import authRouter from './routes/authRoutes.js';
-import productRouter from './routes/productRoutes.js';
-import transactionRouter from './routes/transactionRoute.js';
-import { notFoundError, errorHandler } from './middlewares/errorMiddleware.js';
+import authRouter from './src/routes/authRoutes.js';
+import productRouter from './src/routes/productRoutes.js';
+import transactionRouter from './src/routes/transactionRoute.js';
+import { notFoundError, errorHandler } from './src/middlewares/errorMiddleware.js';
+import tokenSession from './src/middlewares/tokenSession.js';
 
 const corsOptions = {
-  origin: '*',
+  origin: 'http://localhost:1213',
   credentials: true,
 };
 
@@ -20,6 +21,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(tokenSession);
 
 app.use('/api', authRouter);
 app.use('/api', productRouter);
