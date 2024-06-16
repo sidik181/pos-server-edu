@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import Users from '../services/userAccount.js';
 import jwt from 'jsonwebtoken';
 import Authentications from '../models/authentications.js';
-import { generateToken } from '../utils/tokenManager.js'
+import { generateToken, verifyToken } from '../utils/tokenManager.js'
 
 const login = async (req, res, next) => {
 	const { email, password } = req.body;
@@ -50,20 +50,24 @@ const login = async (req, res, next) => {
 };
 
 const logout = async (req, res, next) => {
-	const refreshToken = req.cookies.token;
+	const { refreshToken } = req.cookies;
 
 	if (!refreshToken) {
 		return res.status(400).json({ message: 'No refresh token found' });
 	}
 
 	try {
-		const authRecord = await Authentications.findOne({ refreshToken });
+		const { payload } = verifyToken(refreshToken);
+		const authRecord = await Authentications.findOne({ session_id: payload.sessionId });
 
 		if (!authRecord) {
 			return res.status(403).json({ message: 'Invalid refresh token' });
 		}
 
-		await Authentication.deleteOne({ refreshToken });
+		await Authentication.deleteOne({ session_id: payload.sessionId });
+
+		res.clearCookie('accessToken');
+		res.clearCookie('refreshToken');
 
 		return res.json({ message: 'Logout successful' });
 	} catch (error) {
