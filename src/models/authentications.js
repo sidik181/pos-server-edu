@@ -5,10 +5,6 @@ const authenticationsSchema = Schema({
 		type: String,
 		required: true
 	},
-	email: {
-		type: String,
-		required: true,
-	},
 	valid: {
 		type: Boolean,
 		required: true

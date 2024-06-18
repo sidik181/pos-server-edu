@@ -3,7 +3,7 @@ const { Authentications } = require('../models/authentications');
 const deleteExpiredTokens = async () => {
     try {
         const currentTime = new Date();
-        await Authentications.deleteMany({ expiresAt: { $lt: currentTime } });
+        await Authentications.deleteMany({ expires_at: { $lt: currentTime } });
 
         console.log('Expired tokens deleted successfully.');
     } catch (error) {

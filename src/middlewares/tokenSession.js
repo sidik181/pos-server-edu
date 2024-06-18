@@ -1,4 +1,5 @@
 import Authentications from '../models/authentications.js';
+import Users from '../services/userAccount.js';
 import { generateToken, verifyToken } from '../utils/tokenManager.js';
 
 const tokenSession = async (req, res, next) => {
@@ -20,14 +21,17 @@ const tokenSession = async (req, res, next) => {
 	try {
 		const session = await Authentications.findOne({ session_id: refreshPayload.sessionId });
 
+
 		if (!session && !session.valid) {
 			return next();
 		}
 
-		const newAccessToken = generateToken({ sessionId: session.sessionId, email: session.email }, '5m');
+		const user = Users.find(user => user.uuid === session.session_id);
+
+		const newAccessToken = generateToken({ email: user.email, name: user.full_name, role: user.role, sessionId: session.session_id }, '5m');
 
 		res.cookie('accessToken', newAccessToken, {
-			maxAge: 300000, // 5 minutes
+			maxAge: 5 * 60 * 1000, // 5 minutes
 			httpOnly: true,
 		});
 
@@ -35,6 +39,8 @@ const tokenSession = async (req, res, next) => {
 
 		return next();
 	} catch (error) {
+		res.clearCookie('accessToken');
+		res.clearCookie('refreshToken');
 		return next(error);
 	}
 };

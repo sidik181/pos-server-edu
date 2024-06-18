@@ -1,5 +1,4 @@
 import express from 'express';
-import { verifyToken } from '../utils/tokenManager.js';
 import authController from '../controllers/authController.js';
 import { protectedRoute } from '../middlewares/authorizeUser.js';
 const router = express.Router();

@@ -14,9 +14,12 @@ const login = async (req, res, next) => {
 			const isPasswordValid = await bcrypt.compare(password, user.password);
 			if (isPasswordValid) {
 
+				// const expiresRefreshToken = 60 * 1000 // 1 minutes
+				const expiresRefreshToken = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 				const newAuth = new Authentications({
 					session_id: user.uuid,
-					email: user.email,
+					expires_at: expiresRefreshToken,
 					valid: true
 				});
 				await newAuth.save();
@@ -25,19 +28,19 @@ const login = async (req, res, next) => {
 					{ email: user.email, name: user.full_name, role: user.role, sessionId: newAuth.session_id },
 					'5m'
 				);
-				const refreshToken = generateToken({ sessionId: newAuth.session_id }, '7d');
+				const refreshToken = generateToken({ sessionId: newAuth.session_id }, '1m');
 
 				res.cookie("accessToken", accessToken, {
-					maxAge: 300000, // 5 minutes
+					maxAge: 5 * 60 * 1000, // 5 minutes
 					httpOnly: true,
 				});
 
 				res.cookie("refreshToken", refreshToken, {
-					maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+					maxAge: expiresRefreshToken,
 					httpOnly: true,
 				});
 
-				return res.send(newAuth);
+				return res.send({message: 'Login berhasil'});
 			} else {
 				res.status(401).json({ message: 'Invalid email or password' });
 			}
@@ -98,44 +101,8 @@ const getProfile = (req, res, next) => {
 	}
 };
 
-const refreshToken = async (req, res, next) => {
-	const refreshToken = req.cookies.token;
-
-	if (!refreshToken) {
-		return res.status(403).json({ message: 'Refresh token is required' });
-	}
-
-	try {
-		const authRecord = await Authentications.findOne({ token: refreshToken });
-		const user = Users.find(user => user.uuid === authRecord.user_id);
-
-		if (!authRecord || !user) {
-			return res.status(403).json({ message: 'Invalid refresh token' });
-		}
-
-		const currentTime = new Date();
-		if (currentTime > authRecord.expiresAt) {
-			await Authentications.deleteOne({ refreshToken });
-			return res.status(403).json({ message: 'Refresh token has expired' });
-		}
-
-		jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-
-		const newAccessToken = generateAccessToken(user);
-		res.json({ accessToken: newAccessToken });
-	} catch (error) {
-		next(error);
-	}
-};
-
-const getSession = async (req, res, next) => {
-	const { sessionId } = req.cookies
-}
-
 export default {
 	login,
 	logout,
 	getProfile,
-	refreshToken,
-	getSession
 }
