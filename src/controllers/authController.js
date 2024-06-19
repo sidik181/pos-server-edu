@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import Users from '../services/userAccount.js';
-import jwt from 'jsonwebtoken';
 import Authentications from '../models/authentications.js';
 import { generateToken, verifyToken } from '../utils/tokenManager.js'
 
@@ -14,21 +13,29 @@ const login = async (req, res, next) => {
 			const isPasswordValid = await bcrypt.compare(password, user.password);
 			if (isPasswordValid) {
 
-				// const expiresRefreshToken = 60 * 1000 // 1 minutes
 				const expiresRefreshToken = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-				const newAuth = new Authentications({
-					session_id: user.uuid,
-					expires_at: expiresRefreshToken,
-					valid: true
-				});
-				await newAuth.save();
+				const existAuthentication = await Authentications.findOne({ session_id: user.uuid });
+				if (existAuthentication) {
+					existAuthentication.expires_at = expiresRefreshToken;
+					existAuthentication.valid = true;
+
+					await existAuthentication.save();
+				} else {
+					const newAuth = new Authentications({
+						session_id: user.uuid,
+						expires_at: expiresRefreshToken,
+						valid: true
+					});
+
+					await newAuth.save();
+				}
 
 				const accessToken = generateToken(
 					{ email: user.email, name: user.full_name, role: user.role, sessionId: newAuth.session_id },
 					'5m'
 				);
-				const refreshToken = generateToken({ sessionId: newAuth.session_id }, '1m');
+				const refreshToken = generateToken({ sessionId: newAuth.session_id }, '7d');
 
 				res.cookie("accessToken", accessToken, {
 					maxAge: 5 * 60 * 1000, // 5 minutes
@@ -40,7 +47,7 @@ const login = async (req, res, next) => {
 					httpOnly: true,
 				});
 
-				return res.send({message: 'Login berhasil'});
+				return res.send({ message: 'Login berhasil' });
 			} else {
 				res.status(401).json({ message: 'Invalid email or password' });
 			}

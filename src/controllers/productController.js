@@ -19,7 +19,6 @@ const addProduct = async (req, res, next) => {
 		if(error.name === 'ValidationError') {
 			return res.status(400).json({message: 'Validation error', errors: error.errors});
 		}
-
 		next(error);
 	}
 }
@@ -54,7 +53,7 @@ const deleteProductById = async (req, res, next) => {
 			message: 'Produk berhasil dihapus'
 		})
 	} catch (error) {
-		
+		next(error)
 	}
 }
 

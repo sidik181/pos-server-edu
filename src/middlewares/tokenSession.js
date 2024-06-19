@@ -21,7 +21,6 @@ const tokenSession = async (req, res, next) => {
 	try {
 		const session = await Authentications.findOne({ session_id: refreshPayload.sessionId });
 
-
 		if (!session && !session.valid) {
 			return next();
 		}
