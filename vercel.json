@@ -33,7 +33,7 @@
   ],
   "crons": [
     {
-      "path": "src/utils/deleteExpiredTokens.js",
+      "path": "/src/utils/deleteExpiredTokens.js",
       "schedule": "0 0 * * *"
     }
   ]
