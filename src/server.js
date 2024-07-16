@@ -4,7 +4,10 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 const app = express();
 env.config()
-import('./services/database.js')
+import('./services/database.js');
+
+const PORT = process.env.PORT || 3000;
+const FE_URI = process.env.FE_URI;
 
 import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
@@ -13,7 +16,7 @@ import transactionRouter from './routes/transactionRoute.js';
 import { notFoundError, errorHandler } from './middlewares/errorMiddleware.js';
 
 const corsOptions = {
-  origin: 'http://localhost:1213',
+  origin: FE_URI,
   credentials: true,
 };
 
@@ -29,7 +32,6 @@ app.use('/api', transactionRouter);
 app.use(notFoundError);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
 	console.log(`Server is up on port ${PORT}.`)
 });

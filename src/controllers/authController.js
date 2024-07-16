@@ -47,6 +47,8 @@ const login = async (req, res, next) => {
         const refreshToken = generateToken({ sessionId: user.uuid }, "7d");
 
         res.cookie("refreshToken", refreshToken, {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
           maxAge: expiresRefreshToken,
           httpOnly: true,
         });
