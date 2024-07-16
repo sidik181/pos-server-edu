@@ -1,7 +1,7 @@
 import fs from "fs";
 import jwt from "jsonwebtoken";
 
-const publicKey = fs.readFileSync("key/public.key", "utf8");
+const publicKey = fs.readFileSync("src/key/public.key", "utf8");
 
 export const authorizeUser = (role) => {
   return (req, res, next) => {

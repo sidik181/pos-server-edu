@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
-const privateKey = fs.readFileSync('key/private.key', 'utf8');
-const publicKey = fs.readFileSync('key/public.key', 'utf8');
+const privateKey = fs.readFileSync("src/key/private.key", "utf8");
+const publicKey = fs.readFileSync("src/key/public.key", "utf8");
 
 
 export const generateToken = (payload, expiresIn) => {
