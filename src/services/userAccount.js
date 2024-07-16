@@ -3,7 +3,7 @@ const Users = [
 		"uuid": "fb0c7d31-20ec-49f8-9bbc-242499e5e085",
 		"email": "owner@gmail.com",
 		"password": "$2a$12$e6A.mVpg.i1I3jXRjs3aeu7RMPcsjLor5sRHbSkWwMIVYTgBcjzD6",
-		"full_name": "Owner",
+		"full_name": "Sidik",
 		"role": "owner",
 	},
 	{

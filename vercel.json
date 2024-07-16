@@ -34,7 +34,7 @@
   "crons": [
     {
       "path": "src/utils/deleteExpiredTokens.js",
-      "scheduled": "0 0 * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }

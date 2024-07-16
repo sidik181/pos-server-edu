@@ -1,4 +1,5 @@
 import Product from '../models/product.js';
+import Transaction from '../models/transaction.js'
 
 const addProduct = async (req, res, next) => {
 	try {
@@ -41,13 +42,21 @@ const getProducts = async (req, res, next) => {
 
 const deleteProductById = async (req, res, next) => {
 	try {
-		await Product.findByIdAndDelete(req.params.id);
-		
+		const product = await Product.findByIdAndDelete(req.params.id);
+
 		if (!product) {
 			return res.status(404).json({
 				message: 'Produk tidak ditemukan'
 			});
 		}
+
+		const productWithTransaction = await Transaction.findOne({product: product._id});
+		
+		if (productWithTransaction) {
+			return res.status(401).json({
+				message: 'Produk memiliki transaksi tidak dapat dihapus'
+			});
+		};
 
 		return res.status(201).json({
 			message: 'Produk berhasil dihapus'

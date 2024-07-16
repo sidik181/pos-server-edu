@@ -5,6 +5,10 @@ const authenticationsSchema = Schema({
 		type: String,
 		required: true
 	},
+	expires_at: {
+		type: Date,
+		required: true
+	},
 	valid: {
 		type: Boolean,
 		required: true

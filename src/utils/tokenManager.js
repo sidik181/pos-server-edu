@@ -11,7 +11,7 @@ export const generateToken = (payload, expiresIn) => {
 
 export const verifyToken = (token) => {
     try {
-        const decoded = jwt.verify(token, publicKey,);
+        const decoded = jwt.verify(token, publicKey);
         return { payload: decoded, expired: false };
       } catch (error) {
         return { payload: null, expired: true };

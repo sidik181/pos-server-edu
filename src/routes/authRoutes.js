@@ -14,10 +14,9 @@ router.post(
 	authController.logout
 );
 
-router.get(
-	'/profile',
-	protectedRoute,
-	authController.getProfile
+router.post(
+	'/refresh-token',
+	authController.refreshAccessToken
 );
 
 export default router;

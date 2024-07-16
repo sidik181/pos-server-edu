@@ -1,115 +1,150 @@
-import bcrypt from 'bcrypt';
-import Users from '../services/userAccount.js';
-import Authentications from '../models/authentications.js';
-import { generateToken, verifyToken } from '../utils/tokenManager.js'
+import bcrypt from "bcrypt";
+import Users from "../services/userAccount.js";
+import Authentications from "../models/authentications.js";
+import { generateToken, verifyToken } from "../utils/tokenManager.js";
 
 const login = async (req, res, next) => {
-	const { email, password } = req.body;
+  const { email, password } = req.body;
 
-	try {
-		const user = Users.find(user => user.email === email);
+  try {
+    const user = Users.find((user) => user.email === email);
 
-		if (user) {
-			const isPasswordValid = await bcrypt.compare(password, user.password);
-			if (isPasswordValid) {
+    if (user) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (isPasswordValid) {
+        const expiresAccessToken = 5 * 60 * 1000; // 5 minutes
+        const accessTokenExpiresAt = new Date(Date.now() + expiresAccessToken);
 
-				const expiresRefreshToken = 7 * 24 * 60 * 60 * 1000; // 7 days
+        const expiresRefreshToken = 7 * 24 * 60 * 60 * 1000; // 7 days
+        const refreshTokenExpiresAt = new Date(Date.now() + expiresRefreshToken);
 
-				const existAuthentication = await Authentications.findOne({ session_id: user.uuid });
-				if (existAuthentication) {
-					existAuthentication.expires_at = expiresRefreshToken;
-					existAuthentication.valid = true;
+        let authentication = await Authentications.findOne({
+          session_id: user.uuid,
+        });
 
-					await existAuthentication.save();
-				} else {
-					const newAuth = new Authentications({
-						session_id: user.uuid,
-						expires_at: expiresRefreshToken,
-						valid: true
-					});
+        if (authentication) {
+          authentication.expires_at = refreshTokenExpiresAt;
+          authentication.valid = true;
+          await authentication.save();
+        } else {
+          const authentication = new Authentications({
+            session_id: user.uuid,
+            expires_at: refreshTokenExpiresAt,
+            valid: true,
+          });
+          await authentication.save();
+        }
 
-					await newAuth.save();
-				}
+        const accessToken = generateToken(
+          {
+            name: user.full_name,
+            role: user.role,
+            sessionId: user.uuid,
+          },
+          "5m"
+        );
 
-				const accessToken = generateToken(
-					{ email: user.email, name: user.full_name, role: user.role, sessionId: newAuth.session_id },
-					'5m'
-				);
-				const refreshToken = generateToken({ sessionId: newAuth.session_id }, '7d');
+        const refreshToken = generateToken({ sessionId: user.uuid }, "7d");
 
-				res.cookie("accessToken", accessToken, {
-					maxAge: 5 * 60 * 1000, // 5 minutes
-					httpOnly: true,
-				});
+        res.cookie("refreshToken", refreshToken, {
+          maxAge: expiresRefreshToken,
+          httpOnly: true,
+        });
 
-				res.cookie("refreshToken", refreshToken, {
-					maxAge: expiresRefreshToken,
-					httpOnly: true,
-				});
+				const { password, ...userWithoutPassword } = user;
 
-				return res.send({ message: 'Login berhasil' });
-			} else {
-				res.status(401).json({ message: 'Invalid email or password' });
-			}
-		} else {
-			res.status(401).json({ message: 'Invalid email or password' });
-		}
-	} catch (error) {
-		next(error);
-	}
+				return res.status(201).json({
+          accessToken,
+          accessTokenExpiresAt: accessTokenExpiresAt,
+          user: userWithoutPassword,
+        });
+      } else {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+    } else {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 const logout = async (req, res, next) => {
-	const { refreshToken } = req.cookies;
+  const { refreshToken } = req.cookies;
 
-	if (!refreshToken) {
-		return res.status(400).json({ message: 'No refresh token found' });
-	}
+  if (!refreshToken) {
+    return res.status(400).json({ message: "No refresh token found" });
+  }
 
-	try {
-		const { payload } = verifyToken(refreshToken);
-		const authRecord = await Authentications.findOne({ session_id: payload.sessionId });
+  try {
+    const { payload } = verifyToken(refreshToken);
+    const authRecord = await Authentications.findOne({
+      session_id: payload.sessionId,
+    });
 
-		if (!authRecord) {
-			return res.status(403).json({ message: 'Invalid refresh token' });
-		}
+    if (!authRecord) {
+      res.clearCookie("refreshToken");
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
 
-		await Authentication.deleteOne({ session_id: payload.sessionId });
+    await Authentications.deleteOne({ session_id: payload.sessionId });
 
-		res.clearCookie('accessToken');
-		res.clearCookie('refreshToken');
+    res.clearCookie("refreshToken");
 
-		return res.json({ message: 'Logout successful' });
-	} catch (error) {
-		next(error);
-	}
+    return res.json({ message: "Logout successful" });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const getProfile = (req, res, next) => {
+const refreshAccessToken = async (req, res, next) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: "No refresh token found" });
+  }
+
 	try {
-		const userId = req.user.id;
+    const { payload } = verifyToken(refreshToken);
+    const authRecord = await Authentications.findOne({
+      session_id: payload.sessionId,
+    });
 
-		const user = Users.find(user => user.uuid === userId);
+    const user = Users.find((user) => user.uuid === payload.sessionId);
 
-		if (!user) {
-			return res.status(404).json({ message: 'User not found' });
-		}
+    if (!authRecord) {
+      res.clearCookie("refreshToken");
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
 
-		res.json({
-			message: "success",
-			data: {
-				email: user.email,
-				name: user.full_name,
-				role: user.role
-			}
-		});
-	} catch (error) {
-		next(error);
-	}
+		const expiresAccessToken = 5 * 60 * 1000; // 5 minutes
+    const accessTokenExpiresAt = new Date(Date.now() + expiresAccessToken);
+
+    const newAccessToken = generateToken(
+      {
+        name: user.full_name,
+        role: user.role,
+        sessionId: payload.sessionId,
+      },
+      "5m"
+    );
+
+		const { password, ...userWithoutPassword } = Users.find(
+      (user) => user.uuid === payload.sessionId
+    );
+
+		return res.status(201).json({
+      accessToken: newAccessToken,
+      accessTokenExpiresAt: accessTokenExpiresAt,
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export default {
-	login,
-	logout,
-	getProfile,
-}
+  login,
+  logout,
+  refreshAccessToken
+};
