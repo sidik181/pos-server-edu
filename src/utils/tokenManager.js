@@ -8,6 +8,8 @@ dotenv.config();
 
 const privateKey = process.env.PRIVATE_KEY;
 const publicKey = process.env.PUBLIC_KEY;
+console.log(privateKey);
+
 
 // const ACCESS_SECRET_KEY = process.env.ACCESS_SECRET_KEY;
 // const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY;

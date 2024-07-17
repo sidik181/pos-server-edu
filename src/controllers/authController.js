@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import bcrypt from "bcrypt";
 import Users from "../services/userAccount.js";
 import Authentications from "../models/authentications.js";
