@@ -1,7 +1,15 @@
 import bcrypt from "bcrypt";
 import Users from "../services/userAccount.js";
 import Authentications from "../models/authentications.js";
-import { generateToken, verifyToken } from "../utils/tokenManager.js";
+// import {
+//   generateAccessToken,
+//   generateRefreshToken,
+//   verifyRefreshToken,
+// } from "../utils/tokenManager.js";
+import {
+  generateToken,
+  verifyToken,
+} from "../utils/tokenManager.js";
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -44,7 +52,17 @@ const login = async (req, res, next) => {
           "5m"
         );
 
+        // const accessToken = generateAccessToken(
+        //   {
+        //     name: user.full_name,
+        //     role: user.role,
+        //     sessionId: user.uuid,
+        //   },
+        //   "5m"
+        // );
+
         const refreshToken = generateToken({ sessionId: user.uuid }, "7d");
+        // const refreshToken = generateRefreshToken({ sessionId: user.uuid }, "7d");
 
         res.cookie("refreshToken", refreshToken, {
           secure: process.env.NODE_ENV === "production",

@@ -1,7 +1,11 @@
-import fs from "fs";
+// import fs from "fs";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
-const publicKey = fs.readFileSync("src/key/public.key", "utf8");
+// const publicKey = fs.readFileSync("key/public.key", "utf8");
+const publicKey = process.env.PUBLIC_KEY;
+// const ACCESS_SECRET_KEY = process.env.ACCESS_SECRET_KEY;
 
 export const authorizeUser = (role) => {
   return (req, res, next) => {
