@@ -4,7 +4,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // const publicKey = fs.readFileSync("key/public.key", "utf8");
-const publicKey = process.env.PUBLIC_KEY;
+const publicKeyB64 = process.env.PUBLIC_KEY;
+const publicKey = Buffer.from(publicKeyB64, "base64").toString("utf-8");
 // const ACCESS_SECRET_KEY = process.env.ACCESS_SECRET_KEY;
 
 export const authorizeUser = (role) => {

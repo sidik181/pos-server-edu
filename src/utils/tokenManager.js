@@ -6,8 +6,12 @@ dotenv.config();
 // const privateKey = fs.readFileSync("src/key/private.key", "utf8");
 // const publicKey = fs.readFileSync("src/key/public.key", "utf8");
 
-const privateKey = process.env.PRIVATE_KEY;
-const publicKey = process.env.PUBLIC_KEY;
+const privateKeyB64 = process.env.PRIVATE_KEY;
+const publicKeyB64 = process.env.PUBLIC_KEY;
+
+const privateKey = Buffer.from(privateKeyB64, "base64").toString("utf-8");
+const publicKey = Buffer.from(publicKeyB64, "base64").toString("utf-8");
+
 console.log(privateKey);
 
 
