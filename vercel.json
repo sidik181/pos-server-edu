@@ -18,7 +18,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://pos-fe-edu.vercel.app"
         },
         {
           "key": "Access-Control-Allow-Methods",
