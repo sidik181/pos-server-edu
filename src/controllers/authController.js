@@ -3,11 +3,6 @@ dotenv.config();
 import bcrypt from "bcrypt";
 import Users from "../services/userAccount.js";
 import Authentications from "../models/authentications.js";
-// import {
-//   generateAccessToken,
-//   generateRefreshToken,
-//   verifyRefreshToken,
-// } from "../utils/tokenManager.js";
 import {
   generateToken,
   verifyToken,
@@ -54,17 +49,7 @@ const login = async (req, res, next) => {
           "5m"
         );
 
-        // const accessToken = generateAccessToken(
-        //   {
-        //     name: user.full_name,
-        //     role: user.role,
-        //     sessionId: user.uuid,
-        //   },
-        //   "5m"
-        // );
-
         const refreshToken = generateToken({ sessionId: user.uuid }, "7d");
-        // const refreshToken = generateRefreshToken({ sessionId: user.uuid }, "7d");
 
         res.cookie("refreshToken", refreshToken, {
           secure: process.env.NODE_ENV === "production",
