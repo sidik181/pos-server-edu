@@ -22,7 +22,6 @@ export const protectedRoute = (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1];
-
   jwt.verify(token, publicKey, (err, decoded) => {
     if (err) {
       return res.status(403).send({ message: "Invalid session" });

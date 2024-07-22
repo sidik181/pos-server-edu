@@ -10,7 +10,6 @@ router.post(
 
 router.post(
 	'/logout',
-	protectedRoute,
 	authController.logout
 );
 

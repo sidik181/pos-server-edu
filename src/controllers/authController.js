@@ -53,7 +53,7 @@ const login = async (req, res, next) => {
 
         res.cookie("refreshToken", refreshToken, {
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
+          sameSite: "strict",
           maxAge: expiresRefreshToken,
           httpOnly: true,
         });
@@ -85,6 +85,12 @@ const logout = async (req, res, next) => {
 
   try {
     const { payload } = verifyToken(refreshToken);
+
+    if (!payload) {
+      res.clearCookie("refreshToken");
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
     const authRecord = await Authentications.findOne({
       session_id: payload.sessionId,
     });
