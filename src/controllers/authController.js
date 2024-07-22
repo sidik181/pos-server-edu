@@ -53,7 +53,7 @@ const login = async (req, res, next) => {
 
         res.cookie("refreshToken", refreshToken, {
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: "lax",
           maxAge: expiresRefreshToken,
           httpOnly: true,
         });
