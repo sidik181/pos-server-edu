@@ -53,7 +53,7 @@ const login = async (req, res, next) => {
 
         res.cookie("refreshToken", refreshToken, {
           secure: process.env.NODE_ENV === "production",
-          sameSite: "none",
+          // sameSite: "none",
           maxAge: expiresRefreshToken,
           httpOnly: true,
         });
@@ -119,11 +119,11 @@ const refreshAccessToken = async (req, res, next) => {
 
 	try {
     const { payload } = verifyToken(refreshToken);
+    const user = Users.find((user) => user.uuid === payload.sessionId);
+    
     const authRecord = await Authentications.findOne({
       session_id: payload.sessionId,
     });
-
-    const user = Users.find((user) => user.uuid === payload.sessionId);
 
     if (!authRecord) {
       res.clearCookie("refreshToken");
