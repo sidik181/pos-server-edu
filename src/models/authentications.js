@@ -9,10 +9,6 @@ const authenticationsSchema = Schema({
 		type: Date,
 		required: true
 	},
-	valid: {
-		type: Boolean,
-		required: true
-	},
 });
 
 const Authentications = model('Authentications', authenticationsSchema)

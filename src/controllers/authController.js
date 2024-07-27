@@ -29,13 +29,11 @@ const login = async (req, res, next) => {
 
         if (authentication) {
           authentication.expires_at = refreshTokenExpiresAt;
-          authentication.valid = true;
           await authentication.save();
         } else {
           const authentication = new Authentications({
             session_id: user.uuid,
             expires_at: refreshTokenExpiresAt,
-            valid: true,
           });
           await authentication.save();
         }

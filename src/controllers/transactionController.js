@@ -6,8 +6,8 @@ const createTransaction = async (req, res, next) => {
 
   try {
     let total_price = 0;
-		let total_quantity = 0;
-		const shipping_cost = 10000;
+    let total_quantity = 0;
+    const shipping_cost = 10000;
     const transactionProducts = [];
 
     for (const item of items) {
@@ -23,21 +23,21 @@ const createTransaction = async (req, res, next) => {
       }
 
       total_price += product.price * qty;
-			total_quantity += qty
+      total_quantity += qty;
       transactionProducts.push({
-				product_id: productId,
-				product_name: product.product_name,
-				price: product.price,
+        product_id: productId,
+        product_name: product.product_name,
+        price: product.price,
         quantity: qty,
         sub_total: product.price * qty,
       });
     }
-		
-		total_price += shipping_cost;
+
+    total_price += shipping_cost;
     const newTransaction = new Transaction({
       products: transactionProducts,
       cashier: req.user.name,
-			total_quantity,
+      total_quantity,
       total_price,
     });
 
@@ -62,12 +62,33 @@ const updateStatusTransaction = async (req, res, next) => {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    transaction.status = statusTransaction;
+    if (statusTransaction === "approve" && transaction.status !== "approve") {
+      for (const item of transaction.products) {
+        const product = await Product.findById(item.product_id);
+        if (!product) {
+          return res.status(404).json({
+            message: `Product not found for ID: ${item.product_id}`,
+          });
+        }
 
+        if (product.stock < item.quantity) {
+          return res.status(400).json({
+            message: `Not enough stock available for product: ${product.product_name}`,
+          });
+        }
+
+        product.stock -= item.quantity;
+        await product.save();
+      }
+    }
+
+    transaction.status = statusTransaction;
     await transaction.save();
-    res
-      .status(200)
-      .json({ message: "Transaction updated successfully", data: transaction });
+
+    res.status(200).json({
+      message: "Transaction updated successfully",
+      data: transaction,
+    });
   } catch (error) {
     next(error);
   }
